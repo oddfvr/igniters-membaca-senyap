@@ -210,6 +210,12 @@
             let response = null;
             let loadedFileName = '';
             
+            previewText.innerHTML = `
+                <div class="loading-spinner" align="center">
+                    <div class="spinner"></div>
+                </div>
+            `;
+
             for (let i = 0; i < 30; i++) {
                 const targetDate = new Date();
                 targetDate.setDate(targetDate.getDate() - i);
@@ -222,26 +228,43 @@
 
                 try {
                     response = await fetch(dateFileName);
+                    
                     if (response.ok) {
-                        loadedFileName = dateFileName;
-                        break;
+                        const contentType = response.headers.get("content-type") || "";
+                        if (contentType.includes("application/json")) {
+                            loadedFileName = dateFileName;
+                            break;
+                        }
                     }
                 } catch (e) {}
             }
 
+            if (!loadedFileName) {
+                const fallbackFile = 'assets/read/new.json';
+                try {
+                    response = await fetch(fallbackFile);
+                    if (response.ok) {
+                        const contentType = response.headers.get("content-type") || "";
+                        if (contentType.includes("application/json") || response.status === 200) {
+                            loadedFileName = fallbackFile;
+                        }
+                    }
+                } catch (e) {}
+            }
+            
             try {
-                if (!response || !response.ok) {
-                    throw new Error('no content can be found');
+                if (!loadedFileName) {
+                    throw new Error('no content files found anywhere');
                 }
 
                 const jsonResponse = await response.json();
                 globalContentData = jsonResponse.record || jsonResponse;
                 
-                console.log(`loaded content for: ${loadedFileName}`);
-                
+                console.log(`successfully loaded content from: ${loadedFileName}`);
                 renderContent();
+
             } catch (error) {
-                console.error('failed to load any content:', error);
+                console.error('Failed to load any content:', error);
             }
         }
 
@@ -257,39 +280,43 @@
 
             if (content) {
                 let htmlContent = `
-                    <h1>${content.title}</h1>
-                    <h2 class="auth">${content.author}</h2>
-                    <h5>(${content.date}, ${content.i})</h5>
-                    <hr>
-                    ${content.paragraphs.map(p => `<p>${p}</p>`).join('')}
+                    <div class="fade-in-content">
+                        <h1>${content.title}</h1>
+                        <h2 class="auth">${content.author}</h2>
+                        <h5>(${content.date},${content.i})</h5>
+                        <hr>
+                        ${content.paragraphs.map(p => `<p>${p}</p>`).join('')}
                 `;
 
                 if (content.glossary && Object.keys(content.glossary).length > 0) {
                     htmlContent += `
-                        <hr>
-                        <div class="gloss">
-                            <h3 style="margin-top: 0; margin-bottom: 10px;">Glossary</h3>
-                            <ul style="list-style-type: none; padding-left: 0; margin: 0;">
+                            <hr>
+                            <div class="gloss">
+                                <h3 style="margin-top: 0; margin-bottom: 10px;">Glossary</h3>
+                                <ul style="list-style-type: none; padding-left: 0; margin: 0;">
                     `;
                     for (const [key, value] of Object.entries(content.glossary)) {
-                        htmlContent += `<li id="gloss-${key}" style="margin-bottom: 6px;">[${key}] ${value}</li>`;
+                        htmlContent += `<li id="gloss-${key}" style="margin-bottom: 6px;">[${key}]${value}</li>`;
                     }
                     htmlContent += `
-                            </ul>
-                        </div>
+                                </ul>
+                            </div>
                     `;
                 } else {
                     htmlContent += `<br>`;
                 }
 
                 htmlContent += `  
-                    <a href="https://forms.gle/k1TMbGo6E4L8x3Zo6">${requestText}</a>
-                    <center>
-                    <hr>
-                        <img class="icon" src="assets/igniters.svg">
-                        <p class="credits">PDD Igniters • 2026</p>
-                        <p class="credits" style="font-size:x-small; opacity: 30%;">Made by Erinna</p>
-                    </center>
+                        <a href="https://forms.gle/k1TMbGo6E4L8x3Zo6">${requestText}</a>
+                        <center>
+                        <hr>
+                            <img class="icon" src="assets/igniters.svg">
+                            <p class="credits">
+                                PDD Igniters • 2026<br>
+                                <span style="font-size: x-small; opacity: 0.6;">Made by Erinna</span>
+                            </p>
+                        </center>
+                    </div>
                 `;
 
                 previewText.innerHTML = htmlContent;
