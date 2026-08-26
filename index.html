@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membaca Senyap</title>
+    <link rel="icon" type="image/svg+xml" href="assets/igniters.svg">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://db.onlinewebfonts.com/c/7cc6719bd5f0310be3150ba33418e72e?family=Comic+Sans+MS" rel="stylesheet">
+    <link href="https://db.onlinewebfonts.com/c/562fa31bba08b3f71cb71257ddb880d5?family=Verdana" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Just+Another+Hand&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="progress-bar"></div>
+    <div class="overlay" id="overlay"></div>
+
+    <button class="floating-menu-btn" id="floating-menu-btn" title="Open Settings">
+    <svg class="hamburger-icon" viewBox="0 0 24 24" width="22" height="22">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+    </button>
+
+
+    <div class="control-panel collapsed" id="control-panel">
+        <div class="panel-header">
+            <h2>Settings</h2>
+            <button class="toggle-btn" id="toggle-btn" title="Collapse Panel">✕</button>
+        </div>
+
+        <div class="control-group">
+            <label for="language-select">Language • Bahasa</label>
+            <select id="language-select">
+                <option value="en" selected>English</option>
+                <option value="id">Bahasa Indonesia</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="bg-color-select">Theme • Tema</label>
+            <select id="bg-color-select">
+                <option value="default" selected>Default</option>
+                <option value="light-gray">Light Gray</option>
+                <option value="sepia">Sepia</option>
+                <option value="dark">Dark Mode</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="text-alignment">Alignment • Rata</label>
+            <select id="text-alignment">
+                <option value="left">Left (←)</option>
+                <option value="justify" selected>Justify</option>
+                <option value="center">Center</option>
+                <option value="right">Right (→)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="font-family">Font</label>
+            <select id="font-family">
+                <option value="'Garamond', serif">Garamond (Serif)</option>
+                <option value="Georgia, serif">Georgia (Serif)</option>
+                <option value="'Times New Roman', serif">Times New Roman (Serif)</option>
+                <option value="Arial, sans-serif" selected>Arial (Sans-Serif)</option>
+                <option value="Verdana, sans-serif">Verdana (Sans-Serif)</option>
+                <option value="'Helvetica Neue', sans-serif">Helvetica (Sans-Serif)</option>
+                <option value="'Comic Sans MS', sans-serif">Comic Sans (Sans-Serif)</option>
+                <option value="'Courier New', monospace">Courier New (Monospace)</option>
+                <option value="'Just Another Hand', cursive">Just Another Hand (Script)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="font-size-slider">
+                Font Size • Ukuran Font <span id="font-size-val" class="value-display">16px</span>
+            </label>
+            <input type="range" id="font-size-slider" min="12" max="30" value="16">
+        </div>
+
+        <div class="control-group">
+            <label for="line-height-slider">
+                Line Spacing • Spasi Baris <span id="line-height-val" class="value-display">1.5</span>
+            </label>
+            <input type="range" id="line-height-slider" min="1.0" max="3" step="0.1" value="1.5">
+        </div>
+
+        <div class="control-group">
+            <label for="margin-slider">
+                Margin <span id="margin-val" class="value-display">50px</span>
+            </label>
+            <input type="range" id="margin-slider" min="35" max="120" value="50">
+        </div>
+
+    </div>
+
+    <div class="preview-container" id="preview-container">
+        <div class="preview-card" id="preview-card" style="padding: 50px;">
+            <div id="preview-text" style="font-family: Arial, sans-serif; line-height: 1.5; font-size: 16px;"></div>
+        </div>
+    </div>
+
+    <script>
+        let globalContentData = {};
+        let currentLang = 'en';
+
+        const controlPanel = document.getElementById('control-panel');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const floatingMenuBtn = document.getElementById('floating-menu-btn');
+        const overlay = document.getElementById('overlay');
+
+        const fontSelect = document.getElementById('font-family');
+        const bgColorSelect = document.getElementById('bg-color-select');
+        const languageSelect = document.getElementById('language-select');
+        const textAlignmentSelect = document.getElementById('text-alignment');
+        const marginSlider = document.getElementById('margin-slider');
+        const lineHeightSlider = document.getElementById('line-height-slider');
+        const fontSizeSlider = document.getElementById('font-size-slider');
+
+        const marginVal = document.getElementById('margin-val');
+        const lineHeightVal = document.getElementById('line-height-val');
+        const fontSizeVal = document.getElementById('font-size-val');
+
+        const previewCard = document.getElementById('preview-card');
+        const previewText = document.getElementById('preview-text');
+
+
+        function applySettings(settings) {
+            fontSelect.value = settings.fontFamily;
+            previewText.style.fontFamily = settings.fontFamily;
+
+            applyTheme(settings.theme);
+
+            if (languageSelect) {
+                languageSelect.value = settings.language;
+                currentLang = settings.language;
+            }
+
+            if (textAlignmentSelect && settings.textAlign) {
+                textAlignmentSelect.value = settings.textAlign;
+                previewText.style.textAlign = settings.textAlign;
+            }
+
+            marginSlider.value = settings.margin;
+            marginVal.textContent = settings.margin + 'px';
+            previewCard.style.padding = settings.margin + 'px';
+
+            lineHeightSlider.value = settings.lineHeight;
+            lineHeightVal.textContent = settings.lineHeight;
+            previewText.style.lineHeight = settings.lineHeight;
+            previewText.style.setProperty('--current-line-height', settings.lineHeight);
+
+            fontSizeSlider.value = settings.fontSize;
+            fontSizeVal.textContent = settings.fontSize + 'px';
+            previewText.style.fontSize = settings.fontSize + 'px';
+        }
+
+
+        // theme
+        function applyTheme(theme) {
+            document.body.classList.remove('dark-mode', 'sepia-mode', 'ao3-mode');
+
+            previewCard.style.backgroundColor = ''; 
+
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                previewCard.style.backgroundColor = '#242424';
+            } else if (theme === 'sepia') {
+                document.body.classList.add('sepia-mode');
+                previewCard.style.backgroundColor = '#fdf6e3';
+            } else if (theme === 'light-gray') {
+                document.body.classList.add('ao3-mode');
+                previewCard.style.backgroundColor = '#ffffff';
+            } else {
+                previewCard.style.backgroundColor = '#ffffff';
+            }
+        }
+
+        function saveSettings() {
+            const settings = {
+                fontFamily: fontSelect.value,
+                theme: bgColorSelect.value,
+                language: languageSelect.value,
+                textAlign: textAlignmentSelect.value,
+                margin: marginSlider.value,
+                lineHeight: lineHeightSlider.value,
+                fontSize: fontSizeSlider.value
+            };
+            localStorage.setItem('textLayoutSettings', JSON.stringify(settings));
+        }
+
+
+        function loadSettings() {
+            const saved = localStorage.getItem('textLayoutSettings');
+            if (saved) {
+                try {
+                    const settings = JSON.parse(saved);
+                    applySettings(settings);
+                } catch (e) {
+                    console.error('Error parsing saved settings', e);
+                }
+            }
+        }
+
+        // ambil json
+        async function loadcontent() {
+            let response = null;
+            let loadedFileName = '';
+            
+            for (let i = 0; i < 30; i++) {
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() - i);
+                
+                const year = targetDate.getFullYear();
+                const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const day = String(targetDate.getDate()).padStart(2, '0');
+                const dateFileName = `assets/read/${year}-${month}-${day}.json`;
+
+                try {
+                    response = await fetch(dateFileName);
+                    if (response.ok) {
+                        loadedFileName = dateFileName;
+                        break;
+                    }
+                } catch (e) {}
+            }
+
+            try {
+                if (!response || !response.ok) {
+                    throw new Error('no content can be found');
+                }
+
+                const jsonResponse = await response.json();
+                globalContentData = jsonResponse.record || jsonResponse;
+                
+                console.log(`loaded content for: ${loadedFileName}`);
+                
+                renderContent();
+            } catch (error) {
+                console.error('failed to load any content:', error);
+            }
+        }
+
+        function renderContent() {
+            if (!globalContentData || Object.keys(globalContentData).length === 0) return;
+            const content = globalContentData[currentLang] || globalContentData['en'];
+            
+            const linkTexts = {
+                en: "Got ideas on what we should read next? <u>Submit a request</u>",
+                id: "Punya ide untuk bacaan selanjutnya? <u>Ajukan permintaan</u>"
+            };
+            const requestText = linkTexts[currentLang] || linkTexts['en'];
+
+            if (content) {
+                let htmlContent = `
+                    <h1>${content.title}</h1>
+                    <h2 class="auth">${content.author}</h2>
+                    <h5>(${content.date}, ${content.i})</h5>
+                    <hr>
+                    ${content.paragraphs.map(p => `<p>${p}</p>`).join('')}
+                `;
+
+                if (content.glossary && Object.keys(content.glossary).length > 0) {
+                    htmlContent += `
+                        <hr>
+                        <div class="gloss">
+                            <h3 style="margin-top: 0; margin-bottom: 10px;">Glossary</h3>
+                            <ul style="list-style-type: none; padding-left: 0; margin: 0;">
+                    `;
+                    for (const [key, value] of Object.entries(content.glossary)) {
+                        htmlContent += `<li id="gloss-${key}" style="margin-bottom: 6px;">[${key}] ${value}</li>`;
+                    }
+                    htmlContent += `
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    htmlContent += `<br>`;
+                }
+
+                htmlContent += `  
+                    <a href="https://forms.gle/k1TMbGo6E4L8x3Zo6">${requestText}</a>
+                    <center>
+                    <hr>
+                        <img class="icon" src="assets/igniters.svg">
+                        <p class="credits">PDD Igniters • 2026</p>
+                        <p class="credits" style="font-size:x-small; opacity: 30%;">Made by Erinna</p>
+                    </center>
+                `;
+
+                previewText.innerHTML = htmlContent;
+            }
+        }
+
+        // panel ctrl
+        function openPanel() {
+            controlPanel.classList.remove('collapsed');
+            if (window.innerWidth <= 768) document.body.classList.add('panel-open');
+        }
+
+        function closePanel() {
+            controlPanel.classList.add('collapsed');
+            document.body.classList.remove('panel-open');
+        }
+
+        toggleBtn.addEventListener('click', closePanel);
+        overlay.addEventListener('click', closePanel);
+        floatingMenuBtn.addEventListener('click', openPanel);
+
+        fontSelect.addEventListener('change', (e) => {
+            previewText.style.fontFamily = e.target.value;
+            saveSettings();
+        });
+
+        bgColorSelect.addEventListener('change', (e) => {
+            applyTheme(e.target.value);
+            saveSettings();
+        });
+
+        if (languageSelect) {
+            languageSelect.addEventListener('change', (e) => {
+                currentLang = e.target.value;
+                renderContent();
+                saveSettings();
+            });
+        }
+
+        if (textAlignmentSelect) {
+            textAlignmentSelect.addEventListener('change', (e) => {
+                previewText.style.textAlign = e.target.value;
+                saveSettings();
+            });
+        }
+
+        marginSlider.addEventListener('input', (e) => {
+            const value = e.target.value + 'px';
+            marginVal.textContent = value;
+            previewCard.style.padding = value;
+            saveSettings();
+        });
+
+        lineHeightSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            lineHeightVal.textContent = value;
+            previewText.style.lineHeight = value;
+            previewText.style.setProperty('--current-line-height', value);
+            saveSettings();
+        });
+
+        fontSizeSlider.addEventListener('input', (e) => {
+            const value = e.target.value + 'px';
+            fontSizeVal.textContent = value;
+            previewText.style.fontSize = value;
+            saveSettings();
+        });
+
+        loadSettings();
+        loadcontent();
+    </script>
+</body>
+</html>

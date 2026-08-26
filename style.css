@@ -1,0 +1,374 @@
+:root {
+    --bg-color: #f4f7f6;
+    --panel-bg: #ffffff;
+    --text-color: #333333;
+    --accent-color: #6B9D88;
+    --preview-bg: #fafafa;
+    --preview-card-bg: #ffffff;
+    --select-bg: #ffffff;
+    --select-border: #ccc;
+    --slider-bg: #d0d7d4;
+}
+
+body.ao3-mode {
+    --bg-color: #f8f4f4;
+    --panel-bg: #dddddd;
+    --text-color: #333333;
+    --accent-color: #900;
+    --preview-bg: #fafafa;
+    --preview-card-bg: #F3F2F2;
+    --select-bg: #ffffff;
+    --select-border: #ccc;
+    --slider-bg: #bca8a8;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --panel-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --accent-color: #6B9D88;
+    --preview-bg: #181818;
+    --preview-card-bg: #242424;
+    --select-bg: #2a2a2a;
+    --select-border: #444;
+    --slider-bg: #444444;
+}
+
+body.sepia-mode {
+    --bg-color: #f4ecd8;
+    --panel-bg: #faf2e0;
+    --text-color: #5c4033;
+    --accent-color: #BCA883;
+    --preview-bg: #f0e6cc;
+    --preview-card-bg: #fdf6e3;
+    --select-bg: #f5ebd0;
+    --select-border: #d4c5a9;
+    --slider-bg: #d4c5a9;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    text-wrap: pretty;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@font-face {
+    font-family: "Comic Sans MS";
+    src: url("https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.eot"),
+         url("https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.eot?#iefix") format("embedded-opentype"),
+         url("https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.woff2") format("woff2"),
+         url("https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.woff") format("woff"),
+         url("https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.ttf") format("truetype"),
+         url("https://db.onlinewebfonts.com/t/7cc6719bd5f0310be3150ba33418e72e.svg#Comic Sans MS") format("svg");
+}
+
+@font-face {
+    font-family: "Verdana";
+    src: url("https://db.onlinewebfonts.com/t/562fa31bba08b3f71cb71257ddb880d5.eot"),
+         url("https://db.onlinewebfonts.com/t/562fa31bba08b3f71cb71257ddb880d5.eot?#iefix") format("embedded-opentype"),
+         url("https://db.onlinewebfonts.com/t/562fa31bba08b3f71cb71257ddb880d5.woff2") format("woff2"),
+         url("https://db.onlinewebfonts.com/t/562fa31bba08b3f71cb71257ddb880d5.woff") format("woff"),
+         url("https://db.onlinewebfonts.com/t/562fa31bba08b3f71cb71257ddb880d5.ttf") format("truetype"),
+         url("https://db.onlinewebfonts.com/t/562fa31bba08b3f71cb71257ddb880d5.svg#Verdana") format("svg");
+}
+
+.just-another-hand-regular {
+    font-family: "Just Another Hand", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+#preview-text {
+    font-family: serif;
+    line-height: 1.5;
+    margin: 0;
+    color: inherit;
+}
+
+#preview-text p + p {
+    margin-top: calc(var(--current-line-height, 1.5) * 1.2em);
+}
+
+#preview-text h1 {
+    margin: 0;
+    line-height: 1.2;
+}
+
+#preview-text h5 {
+    font-weight: normal;
+}
+
+#panel-header {
+    font-size: 1.4em;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--select-border);
+    font-size: 1rem;
+    background-color: var(--select-bg);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.control-panel {
+    width: 320px;
+    background-color: var(--panel-bg);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 10;
+    overflow-y: auto;
+    position: relative;
+    transition: transform 0.3s ease, width 0.3s ease, padding 0.3s ease, background-color 0.3s ease;
+}
+
+.control-panel.collapsed {
+    transform: translateX(-320px);
+    padding: 0;
+    width: 0;
+    box-shadow: none;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 10px;
+}
+
+body.dark-mode .panel-header,
+body.sepia-mode .panel-header {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--accent-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.floating-menu-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 5;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--select-border);
+    border-radius: 6px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: background-color 0.2s, transform 0.2s, border-color 0.3s;
+}
+
+.floating-menu-btn:hover {
+    transform: scale(1.05);
+}
+
+.floating-menu-btn .hamburger-icon line {
+    stroke: var(--text-color);
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke 0.2s;
+}
+
+body.ao3-mode .floating-menu-btn {
+    background-color: var(--accent-color);
+}
+
+body.ao3-mode .hamburger-icon line {
+    stroke: var(--panel-bg);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.value-display {
+    font-weight: normal;
+    color: inherit;
+    opacity: 0.7;
+    float: right;
+}
+
+.preview-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: var(--preview-bg);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    transition: background-color 0.3s ease;
+}
+
+.preview-card {
+    background-color: var(--preview-card-bg);
+    width: 100%;
+    max-width: 800px;
+    min-height: 90vh;
+    margin: 20px;
+    border-radius: 2%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    transition: padding 0.1s ease, line-height 0.1s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.auth {
+    font-weight: normal;
+    line-height: 1.2;
+    margin-top: 2%;
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 8;
+    backdrop-filter: blur(2px);
+}
+
+.icon {
+    width: 2.57rem;
+    padding: 25px 0 10px;
+}
+
+.credits {
+    font-weight: lighter;
+    color: var(--text-color);
+    font-size: small;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    opacity: 0.5;
+}
+
+.icon + .credits,
+.credits + .credits {
+    line-height: 6px;
+    margin-top: 6px;
+}
+
+a {
+    font-weight: lighter;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: medium;
+    opacity: 0.8;
+    transition: color 0.32s ease, opacity 0.2s ease;
+}
+
+a:hover {
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+/* SLIDER */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--slider-bg);
+    height: 4px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="range"]::-moz-range-track {
+    background: var(--slider-bg);
+    height: 4px;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--accent-color);
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background-color: var(--accent-color);
+    height: 16px;
+    width: 16px;
+    border: none;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.scdiv {
+    width: 30%;
+}
+
+.gloss {
+    border: 1px solid var(--select-border);
+    background-color: var(--select-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .control-panel {
+        position: fixed;
+        height: 100vh;
+        width: 85%;
+        max-width: 320px;
+        transform: translateX(-100%);
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .control-panel:not(.collapsed) {
+        transform: translateX(0);
+    }
+
+    .control-panel.collapsed {
+        transform: translateX(-100%);
+        width: 85%;
+        padding: 25px;
+    }
+
+    body.panel-open .overlay {
+        display: block;
+    }
+
+    .preview-card {
+        margin: 10px;
+        min-height: 95vh;
+    }
+}
